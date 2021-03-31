@@ -204,7 +204,9 @@ class Runtime:
 
         # Connect to all parties > self.pid.
         for peer in self.parties[self.pid + 1:]:
+            logging.info("just tst")
             logging.debug(f'Connecting to {peer}')
+            logging.info(f'Connecting to {peer}')
             while True:
                 try:
                     if self.options.ssl:

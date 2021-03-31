@@ -32,6 +32,7 @@ def scale_to_int(f):
 
 def load(name, f, a=2):
     W = np.load(os.path.join('data', 'cnn', 'W_' + name + '.npy'))
+    # print("type of W:", type(W))
     W = scale_to_int(1 << f)(W)
     b = np.load(os.path.join('data', 'cnn', 'b_' + name + '.npy'))
     b = scale_to_int(1 << (a * f))(b)

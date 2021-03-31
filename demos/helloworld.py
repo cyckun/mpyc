@@ -31,4 +31,6 @@ from mpyc.runtime import mpc
 
 mpc.run(mpc.start())     # connect to all other parties
 print(''.join(mpc.run(mpc.transfer('Hello world!'))))
+# print(''.join(mpc.run(mpc.transfer('Hello world!', senders=1, receivers=0))))
+# print(''.join(mpc.run(mpc.transfer('Hello world!', senders=0, receivers=1))))
 mpc.run(mpc.shutdown())  # disconnect, but only once all other parties reached this point
