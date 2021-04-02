@@ -3,7 +3,7 @@ import socket
 if __name__ == '__main__':
 
     server = socket.socket()  # 默认是AF_INET、SOCK_STREAM
-    server.bind(("0.0.0.0",16868))   # 将主机号与端口绑定到套接字
+    server.bind(("0.0.0.0",6868))   # 将主机号与端口绑定到套接字
     server.listen()   # 设置并启动TCP监听器
     while True:
       conn,addr = server.accept()   # 被动接受TCP连接，一直等待连接到达

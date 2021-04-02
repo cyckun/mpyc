@@ -9,15 +9,27 @@ Run with m parties to compute:
 
 Bit lengths of secure integers ensure each result fits for any m >= 1.
 """
+from time import sleep
 
 from mpyc.runtime import mpc
 
 m = len(mpc.parties)
 l = m.bit_length()
 
+
 mpc.run(mpc.start())
+var = mpc.SecInt(l + 1)(1)
+print("var :", type(var))
+var = mpc.SecInt(l + 1)
+print("var1 :", type(var))
+
 print('m    =', mpc.run(mpc.output(mpc.sum(mpc.input(mpc.SecInt(l+1)(1))))))
+print("mpc.pid:", mpc.pid)
+var = mpc.SecInt(2*l+1)(2*mpc.pid + 1)
+print("var:", var)
+mpc.input(mpc.SecInt(2*l+1)(2*mpc.pid + 1))
 print('m**2 =', mpc.run(mpc.output(mpc.sum(mpc.input(mpc.SecInt(2*l+1)(2*mpc.pid + 1))))))
 print('2**m =', mpc.run(mpc.output(mpc.prod(mpc.input(mpc.SecInt(m+2)(2))))))
 print('m!   =', mpc.run(mpc.output(mpc.prod(mpc.input(mpc.SecInt(int(m*(l-1.4)+3))(mpc.pid + 1))))))
+sleep(100)
 mpc.run(mpc.shutdown())
