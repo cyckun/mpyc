@@ -29,8 +29,24 @@ the PRSS keys, which is proportional to (m choose t) = m!/t!/(m-t)!, will be pro
 
 from mpyc.runtime import mpc
 
+
+
+
 mpc.run(mpc.start())     # connect to all other parties
-print(''.join(mpc.run(mpc.transfer('Hello world!'))))
+# print(''.join(mpc.run(mpc.transfer('Hello world!'))))
+secnum = mpc.SecInt()
+#if mpc.pid == 0:
+print(''.join(mpc.run(mpc.transfer("helloB, ", senders=[0], receivers=[0,1]))))
+secnum1 = mpc.input(secnum(2), 0)
+secnum2 = mpc.input(secnum(3), 1)
+
+a = mpc.run(mpc.output(mpc.mul(secnum1, secnum2), 0))
+if a:
+    print(f'You have received message {a}.')
+
+#if mpc.pid == 1:
+print(''.join(mpc.run(mpc.transfer("helloA, ", senders=[1], receivers=[0,1]))))
+
 # print(''.join(mpc.run(mpc.transfer('Hello world!', senders=1, receivers=0))))
 # print(''.join(mpc.run(mpc.transfer('Hello world!', senders=0, receivers=1))))
 mpc.run(mpc.shutdown())  # disconnect, but only once all other parties reached this point

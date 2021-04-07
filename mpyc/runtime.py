@@ -9,6 +9,7 @@ many of which are available through Python's mechanism for operator overloading.
 import os
 import sys
 import time
+import string
 import datetime
 import importlib.util
 import logging
@@ -58,6 +59,9 @@ class Runtime:
         """Initialize runtime."""
         self.pid = pid
         self.parties = tuple(parties)
+        for ele in parties:
+            logging.info("init parties:%s", ele)
+        # print("init parties:", self.parties)
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
@@ -689,6 +693,7 @@ class Runtime:
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
+        print("stype:", stype, a)
         f = stype.frac_length
         if not f:
             await returnType(stype)
@@ -1993,6 +1998,146 @@ def setup():
                        default=False, help='append output for parties i>0 to party{m}_{i}.log')
     group.add_argument('-f', type=str,
                        default='', help='consume IPython\'s -f argument F')
+    parser.set_defaults(bit_length=32, sec_param=30)
+
+    argv = sys.argv  # keep raw args
+    options, args = parser.parse_known_args()
+    if options.HELP:
+        parser.print_help()
+        sys.exit()
+
+    if options.help:
+        args += ['-h']
+        print(f'Showing help message for {sys.argv[0]}, if available:')
+        print()
+    sys.argv = [sys.argv[0]] + args
+    if options.no_log:
+        logging.basicConfig(level=logging.WARNING)
+    else:
+        logging.basicConfig(format='{asctime} {message}', style='{',
+                            level=logging.INFO, stream=sys.stdout)
+
+    env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
+    if not importlib.util.find_spec('gmpy2'):
+        # gmpy2 package not available
+        if not (options.no_gmpy2 or env_no_gmpy2):
+            logging.info('Install package gmpy2 for better performance.')
+    else:
+        # gmpy2 package available
+        if options.no_gmpy2 or env_no_gmpy2:
+            logging.info('Use of package gmpy2 disabled.')
+            if not env_no_gmpy2:
+                os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
+                from importlib import reload
+                reload(mpyc.gmpy)  # stubs will be loaded this time
+
+    env_mix32_64bit = os.getenv('MPYC_MIX32_64BIT') == '1'  # check if MPYC_MIX32_64BIT is set
+    if options.mix32_64bit or env_mix32_64bit:
+        logging.info('Mix of parties on 32-bit and 64-bit platforms enabled.')
+        from hashlib import sha1
+
+        def hop(a):
+            """Simple and portable pseudorandom program counter hop for Python 3.6+.
+
+            Compatible across all (mixes of) 32-bit and 64-bit Python 3.6+ versions. Let's
+            you run MPyC with some parties on 64-bit platforms and others on 32-bit platforms.
+            Useful when working with standard 64-bit installations on Linux/MacOS/Windows and
+            installations currently restricted to 32-bit such as pypy3 on Windows and Python on
+            Raspberry Pi OS.
+            """
+            return int.from_bytes(sha1(str(a).encode()).digest()[:8], 'little', signed=True)
+        asyncoro._hop = hop
+
+    if options.config or options.parties:
+        # use host:port for each local or remote party
+        addresses = []
+        if options.config:
+            # from ini configuration file
+            config = configparser.ConfigParser()
+            config.read_file(open(os.path.join('.config', options.config), 'r'))
+            for party in config.sections():
+                host = config.get(party, 'host')
+                port = config.get(party, 'port')
+                addresses.append((host, port))
+        else:
+            # from command-line -P args
+            print("should enter this config.")
+            for party in options.parties:
+                host, *port_suffix = party.rsplit(':', maxsplit=1)
+                logging.info("host = %s", host)
+                port = ' '.join(port_suffix)
+                addresses.append((host, port))
+        parties = []
+        pid = None
+        for i, (host, port) in enumerate(addresses):
+            if not host:
+                pid = i  # empty host string for owner
+                host = 'localhost'
+            if options.base_port:
+                port = options.base_port + i
+            elif not port:
+                port = 11365 + i
+            else:
+                port = int(port)
+            parties.append(Party(i, host, port))
+        m = len(parties)
+        if pid is None:
+            pid = options.index
+    else:
+        # use default port for each local party
+        m = options.M or 1
+        if m > 1 and options.index is None:
+            import platform
+            import subprocess
+            # convert sys.flags into command line arguments
+            flgmap = {'debug': 'd', 'inspect': 'i', 'interactive': 'i', 'optimize': 'O',
+                      'dont_write_bytecode': 'B', 'no_user_site': 's', 'no_site': 'S',
+                      'ignore_environment': 'E', 'verbose': 'v', 'bytes_warning': 'b',
+                      'quiet': 'q', 'isolated': 'I', 'dev_mode': 'X dev', 'utf8_mode': 'X utf8'}
+            if os.getenv('PYTHONHASHSEED') == '0':
+                # -R flag needed only if hash randomization is not enabled by default
+                flgmap['hash_randomization'] = 'R'
+            flg = lambda a: getattr(sys.flags, a, 0)
+            flags = ['-' + flg(a) * c for a, c in flgmap.items() if flg(a)]
+            # convert sys._xoptions into command line arguments
+            xopts = ['-X' + a + ('' if c is True else '=' + c) for a, c in sys._xoptions.items()]
+            prog, args = argv[0], argv[1:]
+            for i in range(m-1, 0, -1):
+                cmd_line = [sys.executable] + flags + xopts + [prog, '-I', str(i)] + args
+                if options.output_windows and platform.platform().startswith('Windows'):
+                    subprocess.Popen(['start'] + cmd_line, shell=True)
+                elif options.output_file:
+                    with open(f'party{options.M}_{i}.log', 'a') as f:
+                        f.write('\n')
+                        f.write(f'$> {" ".join(cmd_line)}\n')
+                        subprocess.Popen(cmd_line, stdout=f, stderr=subprocess.STDOUT)
+                else:
+                    subprocess.Popen(cmd_line, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        options.no_async = m == 1 and (options.no_async or not options.M)
+        pid = options.index or 0
+        base_port = options.base_port or 11365
+        parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
+
+    if options.threshold is None:
+        options.threshold = (m-1)//2
+    assert 2*options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
+
+    rt = Runtime(pid, parties, options)
+    sectypes.runtime = rt
+    asyncoro.runtime = rt
+    mpyc.random.runtime = rt
+    mpyc.statistics.runtime = rt
+    mpyc.seclists.runtime = rt
+    return rt
+
+def setup_2pc():
+    """Setup a runtime."""
+    parser = argparse.ArgumentParser(add_help=False)
+    group = parser.add_argument_group('MPyC configuration')
+    group.add_argument('-M', type=int, metavar='m',
+                       help='use m local parties (and run all m, if i is not set)')
+    group = parser.add_argument_group('MPyC parameters')
+    group = parser.add_argument_group('MPyC misc')
     parser.set_defaults(bit_length=32, sec_param=30)
 
     argv = sys.argv  # keep raw args
