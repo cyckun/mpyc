@@ -21,11 +21,7 @@ if __name__ == '__main__':
     tst = mpc.output(a*b)
     print(tst)
     # 2 party mul;
-    x = ({4, 3}, [1 - 1j, 2.5], 0, range(7))
-    print("x:", x)
-    mpc.run(mpc.transfer(x, senders=0))
-    var = mpc.run(mpc.transfer(x, senders=[0]))[0]
-
+    test_runtime =
 
 """
     secfield = mpc.SecFld(11)

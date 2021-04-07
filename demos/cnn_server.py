@@ -134,7 +134,7 @@ async def main():
     if k - int(k) == 0.5:
         secnum = mpc.SecFxp(10, 4)
     else:
-        secnum = mpc.SecInt(3)
+        secnum = mpc.SecInt(37)
     batch_size = round(k - 0.01)
 
     await mpc.start()
