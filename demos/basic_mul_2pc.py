@@ -17,19 +17,6 @@ if __name__ == '__main__':
     m = len(mpc.parties)
     # m = 3
     print("m = ", m)
-    if m % 2 == 1:
-        print('OT runs with even number of parties only.')
-        sys.exit()
-
-    t = m // 2
-    message = [(None, None)] * t
-    choice = [None] * t
-    message[0] = (random.randint(0, 99), random.randint(0, 99))
-    print("mpc.pid = ", mpc.pid)
-    print(f'You are sender {mpc.pid} holding messages '
-        f'{message[mpc.pid - 1][0]} and {message[mpc.pid - 1][1]}.')
-    choice[0] = random.randint(0, 1)
-    print(f'You are receiver {mpc.pid - t} with random choice bit {choice[0]}.')
 
     mpc.run(mpc.start())
 
@@ -37,9 +24,10 @@ if __name__ == '__main__':
     for i in range(0, 1):
         #x = mpc.input([secnum(message[i - 1][0]), secnum(18)], i)
         x = mpc.input(secnum(18), 0)
-        b = mpc.input(secnum(choice[0]), 1)
+        b = mpc.input(secnum(6), 1)
         #a = mpc.run(mpc.output(mpc.if_else(b, x[1], x[0]), t + i))
-        a = mpc.run(mpc.output(mpc.mul(x, x), t + i))
+        tmp = mpc.mul(x, b)
+        a = mpc.run(mpc.output(tmp, i+1))
         if a:
             print(f'You have received message {a}.')
 

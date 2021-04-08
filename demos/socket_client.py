@@ -6,7 +6,7 @@ LOCAL = False
 if LOCAL:
     HOST = '127.0.0.1'  # or 'localhost'
 else:
-    HOST = '192.168.150.138'
+    HOST = '192.168.150.1'
 PORT = 6868
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
@@ -19,8 +19,8 @@ if __name__ == '__main__':
     loop = True
     while loop == True:
         #data1 = input('>')
-        #data1 = "i'm alice"
-        data1 = secnum(2)
+        data1 = "i'm alice"
+        #data1 = secnum(2)
         # data = str(data)
         if type(data1) is str and not data1:
             break
