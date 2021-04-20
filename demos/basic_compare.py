@@ -12,11 +12,12 @@ if __name__ == '__main__':
         print("enter your number:")
         num_x = input('input x:')
         x = mpc.input(secnum(int(num_x)), 0)
-    if mpc.pid ==1:
+    if mpc.pid == 1:
         num_y = input('input y:')
         y = mpc.input(secnum(int(num_y)), 1)
     print("x, y = ", x, y)
     tmp = mpc.sub(x, y)
+    print("sub result:", mpc.run(mpc.output(tmp)))
     tmp = mpc.sgn(tmp)
     a = mpc.run(mpc.output(tmp, 1))
     if a:
