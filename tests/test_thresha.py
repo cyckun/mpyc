@@ -15,8 +15,9 @@ class Arithmetic(unittest.TestCase):
     def test_secretsharing(self):
         for field in (self.f2, self.f256):
             t = 0
-            m = 1
-            a = [field(0), field(1)]
+            m = 2
+            #a = [field(0), field(1)]
+            a = [field(0)]
             shares = thresha.random_split(a, t, m)
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
             self.assertEqual(a, b)
@@ -27,7 +28,7 @@ class Arithmetic(unittest.TestCase):
             for t in range(8):
                 m = 2 * t + 1
                 for i in range(t):
-                    a = [field(i), field(i+1), field(i**2), field((i+1)**2)]
+                    a = [field(i+3)]
                     shares = thresha.random_split(a, t, m)
                     b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                     self.assertEqual(a, b)

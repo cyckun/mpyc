@@ -5,7 +5,7 @@ as such aimed at small scale use ("at the level of graphing and scientific calcu
 Functions mean, median, median_low, median_high, and mode are provided for calculating
 averages (measures of central location). Functions variance, stdev, pvariance, pstdev
 are provided for calculating variability (measures of spread).
-
+mp
 Most of these functions work best with secure fixed-point numbers, but some effort is
 done to support the use of secure integers as well. For instance, the mean of a sample
 of integers is rounded to the nearest integer, which may still be useful. The variance

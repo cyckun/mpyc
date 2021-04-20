@@ -19,10 +19,12 @@ async def main():
         print('Setting input to default =', n)
 
     s = [(-1)**i * (i + n//2)**2 for i in range(n)]
-
+    print("s = ",s)
     secnum = mpc.SecInt()
+    print("bitlenght", secnum.field.order)
     print('Using secure integers:', secnum)
     x = list(map(secnum, s))
+    print("x：",x[0].share)
     async with mpc:
         mpc.random.shuffle(secnum, x)  # secret in-place random shuffle
         print('Randomly shuffled input:', await mpc.output(x))
@@ -30,7 +32,9 @@ async def main():
         print('Sorted by absolute value:', await mpc.output(x))
 
     secnum = mpc.SecFxp()
+    print("secnum prime: ", secnum.field.order, secnum.bit_length)
     print('Using secure fixed-point numbers:', secnum)
+    print("bit lof secfix:", secnum.bit_length)
     x = list(map(secnum, s))
     async with mpc:
         mpc.random.shuffle(secnum, x)  # secret in-place random shuffle

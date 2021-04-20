@@ -37,6 +37,7 @@ class MessageExchanger(Protocol):
 
         If the party is a client for this connection, it sends its identity
         to the peer as well as any PRSS keys.
+
         """
         self.transport = transport
         if self.peer_pid is not None:  # party is client (peer is server)
@@ -201,7 +202,7 @@ def _get_results(obj):
 
 def gather_shares(rt, *obj):
     """Gather all results for the given futures (shares)."""
-    if len(obj) == 1:
+    if len(obj) == 1:  # if operation is on 1 element, no need to return shares;
         obj = obj[0]
     if obj is None:
         return _AwaitableFuture(None)

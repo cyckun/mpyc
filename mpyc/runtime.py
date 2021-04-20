@@ -693,7 +693,7 @@ class Runtime:
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
-        print("stype:", stype, a)
+        # print("stype:", stype, a)
         f = stype.frac_length
         if not f:
             await returnType(stype)

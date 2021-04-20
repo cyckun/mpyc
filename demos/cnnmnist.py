@@ -134,7 +134,7 @@ async def main():
     if k - int(k) == 0.5:
         secnum = mpc.SecFxp(10, 4)
     else:
-        secnum = mpc.SecInt(3)
+        secnum = mpc.SecInt(37)
     batch_size = round(k - 0.01)
 
     await mpc.start()
@@ -156,7 +156,9 @@ async def main():
     print('Labels:', labels)
     df = gzip.open(os.path.join('data', 'cnn', 't10k-images-idx3-ubyte.gz'))
     d = df.read()[16 + offset * 28**2: 16 + (offset + batch_size) * 28**2]
+    print("type d:", type(d))
     x = list(map(lambda a: a/255, d))
+    print("x= ", x)
     x = np.array(x).reshape(batch_size, 1, 28, 28)
     if batch_size == 1:
         print(np.array2string(np.vectorize(lambda a: int(bool(a)))(x[0, 0]), separator=''))
@@ -204,7 +206,9 @@ async def main():
     if issubclass(secnum, mpc.Integer):
         secnum.bit_length = 37
     for i in range(batch_size):
-        prediction = int(await mpc.output(mpc.argmax(x[i])[0]))
+        tmp = mpc.argmax(x[i])[0]   # (index, x[index]), tmp is index;
+        print("tmp:", tmp, mpc.argmax(x[i])[1].share)
+        prediction = int(await mpc.output(tmp))
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(x[i]))
