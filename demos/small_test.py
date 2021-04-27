@@ -2,7 +2,7 @@
 
 import threading
 import asyncio
-
+from mpyc.runtime import mpc
 
 async def hello():
     print('Hello world! (%s)' % threading.currentThread())
@@ -17,7 +17,11 @@ if __name__ == '__main__':
     print("end loop")
     loop.close()
     """
-    n = 1
-    m = 2
-    shares = [[None] * n for _ in range(m)]
-    print('share:', shares)
+    #mpc.run(mpc.start())
+    secnum = mpc.SecInt()
+    x = secnum(3)
+    y = secnum(4)
+    z = mpc.mul(x, y)
+    result = mpc.output(z)
+    print("result = ", result)
+    #mpc.run(mpc.shutdown())

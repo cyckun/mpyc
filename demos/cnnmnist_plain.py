@@ -16,8 +16,6 @@ import sys
 import logging
 import random
 import gzip
-import time
-
 import numpy as np
 from mpyc.runtime import mpc
 
@@ -169,7 +167,6 @@ async def main():
     print("length of x:", len(x), sys.getsizeof(x))
     x = scale_to_int(1 << f)(x) # convert plain to cipher;
 
-    begin = time.time()
     logging.info('--------------- LAYER 1 -------------')
     W, b = load('conv1', f)
     x = convolvetensor(x, W, b)
@@ -210,13 +207,11 @@ async def main():
         secnum.bit_length = 37
     for i in range(batch_size):
         tmp = mpc.argmax(x[i])[0]   # (index, x[index]), tmp is index;
-        # print("tmp:", tmp, mpc.argmax(x[i])[1].share)
+        print("tmp:", tmp, mpc.argmax(x[i])[1].share)
         prediction = int(await mpc.output(tmp))
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(x[i]))
-
-    print("predict 1image spend time", time.time()-begin)
 
     await mpc.shutdown()
 

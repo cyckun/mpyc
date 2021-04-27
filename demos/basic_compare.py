@@ -8,6 +8,8 @@ if __name__ == '__main__':
     mpc.run(mpc.start())
     x = 0
     y = 0
+    num_x = 0
+    num_y = 1
     if mpc.pid == 0:
         print("enter your number:")
         num_x = input('input x:')
@@ -17,6 +19,8 @@ if __name__ == '__main__':
     y = mpc.input(secnum(int(num_y)), 1)
     print("x, y = ", x, y)
     tmp = mpc.sub(x, y)
+    tmp = mpc.add(x,y)
+    print("add tmp：", tmp)
     print("sub result:", mpc.run(mpc.output(tmp)))
     tmp = mpc.sgn(tmp)
     a = mpc.run(mpc.output(tmp, 1))

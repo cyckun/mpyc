@@ -23,7 +23,7 @@ if __name__ == '__main__':
     secnum = mpc.SecInt()
     for i in range(0, 1):
         #x = mpc.input([secnum(message[i - 1][0]), secnum(18)], i)
-        x = mpc.input(secnum(18), 0)
+        x = mpc.input(secnum(1800000000000000000000000000000000000000000000000000000000000000000000000000000000000), 0)
         b = mpc.input(secnum(6), 1)
         #a = mpc.run(mpc.output(mpc.if_else(b, x[1], x[0]), t + i))
         tmp = mpc.mul(x, b)

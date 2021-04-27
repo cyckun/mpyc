@@ -714,6 +714,7 @@ class Runtime:
         if f and b_integral:
             a, b = b, a
         c = a * b
+        #logging.info("after gatehr %s ", type(a))
         if f and (a_integral or b_integral) and not isinstance(a, int):
             c >>= f  # NB: in-place rshift
         if shb:
